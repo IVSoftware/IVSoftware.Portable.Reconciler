@@ -1,23 +1,25 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<Title>IVSoftware.Portable.Reconciler</Title>
-		<TargetFramework>netstandard2.0</TargetFramework>
-		<VersionPrefix>1.0.0</VersionPrefix>
-		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<Description>Comparer analyzes Only-In and Newer-In items for two collections.</Description>
-		<RootNamespace>IVSoftware.Portable</RootNamespace>
+		<PackageTags>collections;synchronize;reconcile;portable;net;android;ios</PackageTags>
+		<PackageProjectUrl>https://github.com/IVSoftware/IVSoftware.Portable.Reconciler.git</PackageProjectUrl>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<Authors>IVSoftware, Thomas C. Gregor</Authors>
 		<Owner>IVSoftware LLC</Owner>
 		<Copyright>Copyright © 2023 IVSoftware LLC</Copyright>
-		<SignAssembly>True</SignAssembly>
 		<FileVersion>$(AssemblyVersion)</FileVersion>
 		<Version>$(AssemblyVersion)</Version>
-		<PackageProjectUrl>https://github.com/IVSoftware/IVSoftware.Portable.WatchdogTimer.git</PackageProjectUrl>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageTags>idisposable;reference-counting;portable;net;android;ios</PackageTags>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
-		<AssemblyOriginatorKeyFile>231129.ivs.pfx</AssemblyOriginatorKeyFile>
+		<SignAssembly>True</SignAssembly>
+		<AssemblyOriginatorKeyFile>231130.ivs.pfx</AssemblyOriginatorKeyFile>
+		<DebugType>embedded</DebugType>
+		<BaseVersion>1.0.1</BaseVersion>
+		<VersionPrefix>$(BaseVersion)-rc</VersionPrefix>
 		<DebugType>embedded</DebugType>
 	</PropertyGroup>
 	<ItemGroup>
