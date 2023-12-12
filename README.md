@@ -95,7 +95,7 @@ ___
 
 **Reconciled return class**
 
-#### Properties
+##### Properties
 
 ```
 /// <summary>
@@ -137,7 +137,7 @@ public Dictionary<T, T> Not { get; }
 
 ___
 
-#### Method
+##### Method
 
 ```csharp
 /// <summary>
