@@ -1,6 +1,8 @@
-# IVSoftware.Portable.Reconciler
+## IVSoftware.Portable.Reconciler
 
 `Reconciler` class encapsulates a `static` method to efficiently sort the two lists into five categories, using the sort and compare criteria supplied to the method. 
+
+#### Categories
 
 - Items that are only contained in the A list.
 - Items that are only contained in the B list.
