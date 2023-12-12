@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-// Constraining multiple parameters
-// https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/generics/constraints-on-type-parameters#constraining-multiple-parameters
-// Except we ended up not needing that here
 namespace IVSoftware.Portable
 {
-	public class Reconciler
+    public class Reconciler
 	{
 		public enum CompareUIDResult
 		{

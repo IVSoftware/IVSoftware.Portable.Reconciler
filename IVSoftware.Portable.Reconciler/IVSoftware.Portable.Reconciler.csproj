@@ -18,7 +18,7 @@
 		<SignAssembly>True</SignAssembly>
 		<AssemblyOriginatorKeyFile>231130.ivs.pfx</AssemblyOriginatorKeyFile>
 		<DebugType>embedded</DebugType>
-		<BaseVersion>1.0.1</BaseVersion>
+		<BaseVersion>1.0.2</BaseVersion>
 		<VersionPrefix>$(BaseVersion)-rc</VersionPrefix>
 		<DebugType>embedded</DebugType>
 	</PropertyGroup>
