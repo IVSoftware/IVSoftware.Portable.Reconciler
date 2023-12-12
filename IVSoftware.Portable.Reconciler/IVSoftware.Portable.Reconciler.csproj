@@ -4,6 +4,7 @@
 		<Description>Comparer analyzes Only-In and Newer-In items for two collections.</Description>
 		<PackageTags>collections;synchronize;reconcile;portable;net;android;ios</PackageTags>
 		<PackageProjectUrl>https://github.com/IVSoftware/IVSoftware.Portable.Reconciler.git</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/IVSoftware/IVSoftware.Portable.Reconciler.git</RepositoryUrl>
 		<TargetFramework>netstandard2.0</TargetFramework>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<Authors>IVSoftware, Thomas C. Gregor</Authors>
@@ -19,7 +20,7 @@
 		<AssemblyOriginatorKeyFile>231130.ivs.pfx</AssemblyOriginatorKeyFile>
 		<DebugType>embedded</DebugType>
 		<BaseVersion>1.0.2</BaseVersion>
-		<VersionPrefix>$(BaseVersion)-rc</VersionPrefix>
+		<VersionPrefix>$(BaseVersion)</VersionPrefix>
 		<DebugType>embedded</DebugType>
 	</PropertyGroup>
 	<ItemGroup>
