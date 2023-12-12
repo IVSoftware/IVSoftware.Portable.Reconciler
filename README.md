@@ -54,7 +54,7 @@ ___
 
 ##### Named delegate
 
-The uidSorter sorts in ascending order. This argument can be passed by making a named method and passing the name:
+The uidSorter sorts in ascending order. This argument can be passed by making a named method and passing 'just' the name:
 
 ```csharp
 CompareUIDResult CompareUID<DatabaseRecord>(a,b) => (CompareUIDResult)a.Guid.CompareTo(b.Guid);
@@ -72,11 +72,11 @@ In this case the argument would be `uidSorter: (a,b)=> (CompareUIDResult)a.Guid.
 
 ___
 
-**VersionComparer example
+**VersionComparer example**
 
 ##### Named delegate
 
-The versionComparer sorts in descending order. This argument can be passed by making a named method and passing the name:
+The versionComparer sorts in descending order. This argument can be passed by making a named method and passing 'just' the name:
 
 ```csharp
 CompareVersionResult CompareVersion<DatabaseRecord>(a,b) => (CompareVersionResult)a.TimeStamp.CompareTo(b.TimeStamp);
