@@ -6,8 +6,8 @@
 
 - [OnlyInA]  - Items that are only contained in the A collection.
 - [OnlyInB]  - Items that are only contained in the B collection.
-- [NewerInA] - Items that are contained in both lists, where A has the newer time stamp.
-- [NewerInB] - Items that are contained in both lists, where B has the newer time stamp.
+- [NewerInA] - Items that are contained in both collections, where A has the newer time stamp.
+- [NewerInB] - Items that are contained in both collections, where B has the newer time stamp.
 - [Equal]    - Returns a Tuple containing tems whose sort criteria and time stamps are identical.
 
 
