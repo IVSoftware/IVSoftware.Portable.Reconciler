@@ -4,11 +4,15 @@
 
 #### Categories
 
-- Items that are only contained in the A list.
-- Items that are only contained in the B list.
-- Items that are contained in both lists, where A has the newer time stamp.
-- Items that are contained in both lists, where B has the newer time stamp.
-- Items whose sort criteria and time stamps are identical.
+- [OnlyInA]  - Items that are only contained in the A collection.
+- [OnlyInB]  - Items that are only contained in the B collection.
+- [NewerInA] - Items that are contained in both lists, where A has the newer time stamp.
+- [NewerInB] - Items that are contained in both lists, where B has the newer time stamp.
+- [Equal]    - Returns a Tuple containing tems whose sort criteria and time stamps are identical.
+
+
+_In the case of [Equal], we only know that the two objects are equal in terms of the supplied comparer delegates for UID and Version. This doesn't rule out the possibility that other properties could differ. Out of an abundance of caution, both versions are preserved and returned leaving it to the user's discretion whether or not to apply additional validation._
+
 
 ___
 

@@ -2,7 +2,7 @@
 	<PropertyGroup>
 		<Title>IVSoftware.Portable.Reconciler</Title>
 		<Description>Comparer analyzes Only-In and Newer-In items for two collections.</Description>
-		<PackageTags>collections;synchronize;reconcile;portable;net;android;ios</PackageTags>
+		<PackageTags>collections;icomparable;versioning;synchronize;reconcile;portable;net;android;ios</PackageTags>
 		<PackageProjectUrl>https://github.com/IVSoftware/IVSoftware.Portable.Reconciler.git</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/IVSoftware/IVSoftware.Portable.Reconciler.git</RepositoryUrl>
 		<TargetFramework>netstandard2.0</TargetFramework>
@@ -13,13 +13,17 @@
 		<FileVersion>$(AssemblyVersion)</FileVersion>
 		<Version>$(AssemblyVersion)</Version>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
-		<PackageTags>idisposable;reference-counting;portable;net;android;ios</PackageTags>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+		<PackageReleaseNotes>
+			- Updated ReadMe with additional documentation on the [Equals] tuple.
+			- To provide more accurate search results on the listing, a duplicate PackageTags entry has been identified and removed.
+			- These are cosmetic improvements that do not alter the functionality.
+		</PackageReleaseNotes>
 		<SignAssembly>True</SignAssembly>
 		<AssemblyOriginatorKeyFile>231130.ivs.pfx</AssemblyOriginatorKeyFile>
 		<DebugType>embedded</DebugType>
-		<BaseVersion>1.0.2</BaseVersion>
+		<BaseVersion>1.0.3</BaseVersion>
 		<VersionPrefix>$(BaseVersion)</VersionPrefix>
 		<DebugType>embedded</DebugType>
 	</PropertyGroup>
