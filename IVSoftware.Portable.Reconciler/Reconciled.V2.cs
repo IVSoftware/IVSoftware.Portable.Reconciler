@@ -7,6 +7,7 @@ using static IVSoftware.Portable.Reconciler;
 
 namespace IVSoftware.Portable
 {
+    #region S T A B L E
     partial class Reconciler
     {
         partial class Reconciled<T> : IReconciled
@@ -28,27 +29,19 @@ namespace IVSoftware.Portable
             public static DisposableExecutionHost DHostApplyContext { get; } = new DisposableExecutionHost();
             public void Apply()
             {
-                if (DHostApplyContext?.IsZero() == false)
-                {
-                    ApplyReconciled(DHostApplyContext.A, DHostApplyContext.B, DHostApplyContext.Mode);
-                }
-                else throw new InvalidOperationException($"{nameof(DHostApplyContext)} required.");
+                ApplyReconciled(DHostApplyContext.A, DHostApplyContext.B, DHostApplyContext.Mode);
             }
             public IReconciled ApplyWithLoopback(Func<IReconciled> customExec = null)
             {
-                if (DHostApplyContext?.IsZero() == false)
+                ApplyReconciled(DHostApplyContext.A, DHostApplyContext.B, DHostApplyContext.Mode);
+                if (customExec is null)
                 {
-                    ApplyReconciled(DHostApplyContext.A, DHostApplyContext.B, DHostApplyContext.Mode);
-                    if (customExec is null)
-                    {
-                        return DefaultExec?.Invoke();
-                    }
-                    else
-                    {
-                        return customExec();
-                    }
+                    return DefaultExec?.Invoke();
                 }
-                else throw new InvalidOperationException($"{nameof(DHostApplyContext)} required.");
+                else
+                {
+                    return customExec();
+                }
             }
             public void ApplyReconciled(IList a, IList b, ReconciliationMode primaryMode)
             {
@@ -86,7 +79,7 @@ namespace IVSoftware.Portable
                 {
                     if (Not is Dictionary<T, T> not)
                     {
-                        if(not[record] is IReconcilable<T> updatable)
+                        if (not[record] is IReconcilable<T> updatable)
                         {
                             updatable.UpdateFrom(record);
                         }
@@ -96,7 +89,7 @@ namespace IVSoftware.Portable
                 {
                     if (Not is Dictionary<T, T> not)
                     {
-                        if(not[record] is IReconcilable<T> updatable)
+                        if (not[record] is IReconcilable<T> updatable)
                         {
                             updatable.UpdateFrom(record);
                         }
@@ -110,7 +103,7 @@ namespace IVSoftware.Portable
             public static Reconciled<T> operator ++(Reconciled<T> original)
             {
                 original.Apply();
-                if(DefaultExec() is Reconciled<T> reconciled)
+                if (DefaultExec() is Reconciled<T> reconciled)
                 {
                     return reconciled;
                 }
@@ -118,4 +111,5 @@ namespace IVSoftware.Portable
             }
         }
     }
+    #endregion S T A B L E
 }

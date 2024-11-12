@@ -1,14 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using static IVSoftware.Portable.Reconciler;
+using System.Collections;
 
 namespace IVSoftware.Portable
 {
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.Reflection;
-
+    #region S T A B L E
     public interface IReconciled
     {
         bool HasChanges { get; }
@@ -62,4 +57,7 @@ namespace IVSoftware.Portable
     {
         T UpdateFrom(T value);
     }
+    #endregion S T A B L E
 }
+
+
