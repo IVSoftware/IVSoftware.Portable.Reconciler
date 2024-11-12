@@ -10,9 +10,9 @@ using System.Threading;
 namespace IVSoftware.Portable
 {
     #region S T A B L E
-    public class DisposableExecutionHost : DisposableHost
+    public class DisposableApplyContext : DisposableHost
     {
-        public DisposableExecutionHost()
+        public DisposableApplyContext()
         {
             CountChanged += (sender, e) =>
             {
@@ -61,7 +61,7 @@ namespace IVSoftware.Portable
 
         private readonly static Stack<ReconciliationMode> _stackMode = new Stack<ReconciliationMode>();
 
-        public DisposableExecutionHost(IList a = null, IList b = null)
+        public DisposableApplyContext(IList a = null, IList b = null)
         {
             A = a;
             B = b;
@@ -75,13 +75,13 @@ namespace IVSoftware.Portable
         public IList B { get; private set; }
 
         public new IDisposable GetToken(object sender = null, Dictionary<string, object> properties = null) =>
-            throw new InvalidOperationException($"{nameof(DisposableExecutionHost)} requires {nameof(ReconciliationMode)} arg for {nameof(GetToken)}()");
+            throw new InvalidOperationException($"{nameof(DisposableApplyContext)} requires {nameof(ReconciliationMode)} arg for {nameof(GetToken)}()");
 
         public IDisposable GetToken(string key, object value) =>
-            throw new InvalidOperationException($"{nameof(DisposableExecutionHost)} requires {nameof(ReconciliationMode)} arg for {nameof(GetToken)}()");
+            throw new InvalidOperationException($"{nameof(DisposableApplyContext)} requires {nameof(ReconciliationMode)} arg for {nameof(GetToken)}()");
 
         public IDisposable GetToken(object sender, string key, object value) =>
-            throw new InvalidOperationException($"{nameof(DisposableExecutionHost)} requires {nameof(ReconciliationMode)} arg for {nameof(GetToken)}()");
+            throw new InvalidOperationException($"{nameof(DisposableApplyContext)} requires {nameof(ReconciliationMode)} arg for {nameof(GetToken)}()");
     }
     #endregion S T A B L E
 }
