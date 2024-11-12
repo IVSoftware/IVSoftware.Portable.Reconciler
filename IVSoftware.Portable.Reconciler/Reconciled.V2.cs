@@ -69,7 +69,7 @@ namespace IVSoftware.Portable
                         localAppend();
                         break;
                     case ReconciliationMode.Trim:
-                        Debug.Fail(nameof(NotImplementedException));
+                        localTrim();
                         break;
                     case ReconciliationMode.TakeA:
                         Debug.Fail(nameof(NotImplementedException));
@@ -81,6 +81,7 @@ namespace IVSoftware.Portable
                         Debug.Fail(nameof(NotImplementedException));
                         break;
                 }
+                localUpdate();
 
                 #region L o c a l M e t h o d s
                 void localAppend()
@@ -94,23 +95,37 @@ namespace IVSoftware.Portable
                         a.Add(record.Clone());
                     }
                 }
-                foreach (T record in NewerInA)
+                void localTrim()
                 {
-                    if (Not is Dictionary<T, T> not)
+                    foreach (ICloneable record in OnlyInA)
                     {
-                        if (not[record] is IReconcilable<T> updatable)
-                        {
-                            updatable.UpdateFrom(record);
-                        }
+                        a.Remove(record);
+                    }
+                    foreach (ICloneable record in OnlyInB)
+                    {
+                        b.Remove(record);
                     }
                 }
-                foreach (T record in NewerInB)
+                void localUpdate()
                 {
-                    if (Not is Dictionary<T, T> not)
+                    foreach (T record in NewerInA)
                     {
-                        if (not[record] is IReconcilable<T> updatable)
+                        if (Not is Dictionary<T, T> not)
                         {
-                            updatable.UpdateFrom(record);
+                            if (not[record] is IReconcilable<T> updatable)
+                            {
+                                updatable.UpdateFrom(record);
+                            }
+                        }
+                    }
+                    foreach (T record in NewerInB)
+                    {
+                        if (Not is Dictionary<T, T> not)
+                        {
+                            if (not[record] is IReconcilable<T> updatable)
+                            {
+                                updatable.UpdateFrom(record);
+                            }
                         }
                     }
                 }

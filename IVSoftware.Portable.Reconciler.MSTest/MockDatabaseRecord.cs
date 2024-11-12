@@ -40,7 +40,21 @@ namespace IVSoftware.Portable.Static.Reconciler.MSTest
 
         [PrimaryKey]
         public string Uid { get; init; } = Guid.NewGuid().ToString().ToUpper();
-        public DateTime TimeStamp { get; set; }
+
+        public DateTime TimeStamp
+        {
+            get => _timeStamp;
+            set
+            {
+                if (!Equals(_timeStamp, value))
+                {
+                    _timeStamp = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+        DateTime _timeStamp = default;
+
 
         [Unique]
         public string? Description { get; set; }
@@ -72,6 +86,8 @@ namespace IVSoftware.Portable.Static.Reconciler.MSTest
         Dictionary<string, object>? _properties = default;
 
         static DisposableHost DHostLoading { get; } = new DisposableHost();
+
+        // [Careful] Do not notify!
         public bool IsModified { get; set; }
 
         protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
@@ -79,7 +95,19 @@ namespace IVSoftware.Portable.Static.Reconciler.MSTest
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
             if (DHostLoading.IsZero())
             {
-                // Proposed: Modify record timestamp.
+                switch (propertyName)
+                {
+                    case nameof(IsModified):
+                        // JIC
+                        break;
+                    case nameof(TimeStamp):
+                        IsModified = true;
+                        break;
+                    default:
+                        // In a non-test record this would be Now.
+                        TimeStamp.AddSeconds(1);
+                        break;
+                }
             }
         }
         public event PropertyChangedEventHandler? PropertyChanged;
