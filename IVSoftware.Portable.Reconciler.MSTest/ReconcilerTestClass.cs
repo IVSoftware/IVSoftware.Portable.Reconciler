@@ -14,6 +14,10 @@ namespace IVSoftware.Portable.Static.Reconciler.MSTest
     public class ReconcilerTestClass
     {
         #region S T A B L E
+
+        /// <summary>
+        /// Creates a new MockDatabaseRecord with a unique UID and a default timestamp.
+        /// </summary>
         static MockDatabaseRecord internalGetNewRecord()
         {
             var i = autoIncrement++;
@@ -30,6 +34,10 @@ namespace IVSoftware.Portable.Static.Reconciler.MSTest
                 IsModified = false, // Reset because property changes make record dirty.
             };
         }
+
+        /// <summary>
+        /// Removes a random record from the specified target list and returns its UID.
+        /// </summary>
         string internalRemoveRandom(IList target)
         {
             var index = rando.Next(target.Count);
@@ -38,6 +46,10 @@ namespace IVSoftware.Portable.Static.Reconciler.MSTest
             return remove.Uid;
         }
 
+
+        /// <summary>
+        /// Modifies the timestamp of a random record in the specified target list and returns the UID and modified timestamp.
+        /// </summary>
         (string uid, DateTime timeStamp) internalModifyRandom(IList target)
         {
             var index = rando.Next(target.Count);
@@ -79,6 +91,10 @@ namespace IVSoftware.Portable.Static.Reconciler.MSTest
         {
         }
 
+        /// <summary>
+        /// Verifies that the DisposableExecutionHost context has initialized properties
+        /// and verifies that reconciliation modes can be pushed and popped.
+        /// </summary>
         [TestMethod]
         public void TestDisposableExecutionHost()
         {
@@ -135,7 +151,14 @@ namespace IVSoftware.Portable.Static.Reconciler.MSTest
         }
 
 
-
+        /// <summary>
+        /// Tests the Reconcile method (version 1) by setting up scenarios for various
+        /// record categories: Equal, OnlyInA, OnlyInB, NewerInA, NewerInB.
+        /// </summary>
+        /// <remarks>
+        /// Uses the V1 Reconcile call exclusively, although the new data structures 
+        /// in Reconciled.V2 are accessedand exercised extensively in the course of testing.
+        /// </remarks>
         [TestMethod]
         public void TestReconcileMethod_V1()
         {
@@ -149,6 +172,7 @@ namespace IVSoftware.Portable.Static.Reconciler.MSTest
 
             reconciled = DefaultExecMDR();
 
+            // Initial comparison of listA and empty listB
             actual = reconciled.ToString();
             actual.ToClipboard();
             actual.ToClipboardAssert("Expecting initialized 12 OnlyInA values with default Epoch.");
@@ -183,6 +207,7 @@ NewerInB
                 "Expecting 12 OnlyInA values with default Epoch."
             );
 
+            // Adding cloned records from listA to listB, making them equal.
             reconciled++;
 
             actual = reconciled.ToString();
@@ -231,7 +256,9 @@ NewerInB
                 "Expecting records are Equal, based on the comparers (not on Equals)"
             );
 
+            // Applying random modifications to both lists
             localMakeWeightedRandomChanges();
+
             reconciled = DefaultExecMDR();
             actual = reconciled.ToString();
             actual.ToClipboard();
@@ -280,7 +307,7 @@ b:UID: ID09, TimeStamp: 03/09/2010 02:45:18, Description: Record 09 modified=Tru
                 "Expecting to see changes in each."
             );
 
-            { }
+            // Adding and removing records from both lists
             reconciled++;
 
             actual = reconciled.ToString();
@@ -629,6 +656,7 @@ NewerInB
                 "Expecting new item in OnlyInB."
             );
 
+            // Using Trim mode to reduce records and validate
             using (dac.GetToken(ReconciliationMode.Trim))
             {
                 reconciled++;
@@ -755,11 +783,272 @@ b:UID: ID05, TimeStamp: 03/09/2010 01:55:16, Description: Record 05 modified=Tru
                 actual.NormalizeResult(),
                 "Expecting random changes."
             );
-
             { }
 
+            var builderPrevA = new List<MockDatabaseRecord>();
+            builderPrevA.AddRange(
+                reconciled
+                .Equal
+                .OfType<Tuple<MockDatabaseRecord, MockDatabaseRecord>>()
+                .Select(_ => _.Item1));
+            builderPrevA.AddRange(
+                reconciled
+                .OnlyInA);
+            builderPrevA.AddRange(
+                reconciled
+                .NewerInA);
+            // Don't forget to count NewerInB because it's still in A!!
+            builderPrevA.AddRange(
+                reconciled
+                .NewerInB);
+
+            using (dac.GetToken(ReconciliationMode.TakeA))
+            {
+                reconciled++;
+            }
+
+            actual = reconciled.ToString();
+            actual.ToClipboard();
+            actual.ToClipboardAssert("Expecting removal of 4 records leaving 10 equal.");
+            { }
+
+            expected = @" 
+Equal
+UID: ID01, TimeStamp: 03/09/2010 00:51:12, Description: Record 01 modified=False
+UID: ID01, TimeStamp: 03/09/2010 00:51:12, Description: Record 01 modified=False
+UID: ID02, TimeStamp: 03/09/2010 02:23:07, Description: Record 02 modified=False
+UID: ID02, TimeStamp: 03/09/2010 02:23:07, Description: Record 02 modified=False
+UID: ID03, TimeStamp: 03/09/2010 02:14:23, Description: Record 03 modified=False
+UID: ID03, TimeStamp: 03/09/2010 02:14:23, Description: Record 03 modified=False
+UID: ID05, TimeStamp: 03/09/2010 01:27:42, Description: Record 05 modified=False
+UID: ID05, TimeStamp: 03/09/2010 01:27:42, Description: Record 05 modified=False
+UID: ID07, TimeStamp: 03/09/2010 00:40:45, Description: Record 07 modified=False
+UID: ID07, TimeStamp: 03/09/2010 00:40:45, Description: Record 07 modified=False
+UID: ID09, TimeStamp: 03/09/2010 02:45:18, Description: Record 09 modified=False
+UID: ID09, TimeStamp: 03/09/2010 02:45:18, Description: Record 09 modified=False
+UID: ID11, TimeStamp: 03/09/2010 01:56:32, Description: Record 11 modified=False
+UID: ID11, TimeStamp: 03/09/2010 01:56:32, Description: Record 11 modified=False
+UID: ID15, TimeStamp: 03/09/2010 00:00:00, Description: Record 15 modified=False
+UID: ID15, TimeStamp: 03/09/2010 00:00:00, Description: Record 15 modified=False
+UID: ID16, TimeStamp: 03/09/2010 00:00:00, Description: Record 16 modified=False
+UID: ID16, TimeStamp: 03/09/2010 00:00:00, Description: Record 16 modified=False
+UID: ID17, TimeStamp: 03/09/2010 00:00:00, Description: Record 17 modified=False
+UID: ID17, TimeStamp: 03/09/2010 00:00:00, Description: Record 17 modified=False
+OnlyInA
+
+OnlyInB
+
+NewerInA
+
+NewerInB
+
+";
+            Assert.AreEqual(
+                expected.NormalizeResult(),
+                actual.NormalizeResult(),
+                "Expecting removal of 4 records leaving 10 equal."
+            );
+
+
+            var builderCurrentA = new List<MockDatabaseRecord>();
+            builderCurrentA.AddRange(
+                reconciled
+                .Equal
+                .OfType<Tuple<MockDatabaseRecord, MockDatabaseRecord>>()
+                .Select(_ => _.Item1));
+            builderCurrentA.AddRange(
+                reconciled
+                .OnlyInA);
+            builderCurrentA.AddRange(
+                reconciled
+                .NewerInA);
+            // Don't forget to count NewerInB because it's still in A!!
+            builderPrevA.AddRange(
+                reconciled
+                .NewerInB);
+
+            Assert.AreEqual(
+                builderPrevA.Count(),
+                builderCurrentA.Count(),
+                $"Expecting the before-and-after A count to jibe.");
+
+            Assert.AreEqual(10, reconciled.Equal.Count());
+            Assert.AreEqual(0, reconciled.OnlyInA.Count());
+            Assert.AreEqual(0, reconciled.OnlyInB.Count());
+            Assert.AreEqual(0, reconciled.NewerInA.Count());
+            Assert.AreEqual(0, reconciled.NewerInB.Count());
+
+            // ^^^^^^^^^^^^
+            // ============
+
+
+
+            target = listA;
+            builder = new List<string>();
+            listA.Add(internalGetNewRecord());
+            listA.Add(internalGetNewRecord());
+            listA.Add(internalGetNewRecord());
+            builder.Add($"{internalRemoveRandom(target)}");
+            builder.Add($"{internalRemoveRandom(target)}");
+            builder.Add($"{internalRemoveRandom(target)}");
+            builder.Add($"{internalModifyRandom(target)}");
+            builder.Add($"{internalModifyRandom(target)}");
+
+            target = listB;
+            listB.Add(internalGetNewRecord());
+            builder.Add($"{internalRemoveRandom(target)}");
+            builder.Add($"{internalModifyRandom(target)}");
+
+            actual = string.Join(Environment.NewLine, builder);
+            actual.ToClipboard();
+            actual.ToClipboardAssert("Expecting consistent pseudorando index values.");
+            { }
+
+            expected = @" 
+ID09
+ID02
+ID21
+(ID01, 3/9/2010 3:33:28 AM)
+(ID11, 3/9/2010 3:43:02 AM)
+ID01
+(ID02, 3/9/2010 2:58:55 AM)";
+            Assert.AreEqual(
+                expected.NormalizeResult(),
+                actual.NormalizeResult(),
+                "Expecting consistent pseudorando index values."
+            );
+
+            reconciled = DefaultExecMDR();
+
+            actual = reconciled.ToString();
+            actual.ToClipboard();
+            actual.ToClipboardAssert("Expecting random changes.");
+            { }
+            expected = @" 
+Equal
+UID: ID03, TimeStamp: 03/09/2010 02:14:23, Description: Record 03 modified=False
+UID: ID03, TimeStamp: 03/09/2010 02:14:23, Description: Record 03 modified=False
+UID: ID05, TimeStamp: 03/09/2010 01:27:42, Description: Record 05 modified=False
+UID: ID05, TimeStamp: 03/09/2010 01:27:42, Description: Record 05 modified=False
+UID: ID07, TimeStamp: 03/09/2010 00:40:45, Description: Record 07 modified=False
+UID: ID07, TimeStamp: 03/09/2010 00:40:45, Description: Record 07 modified=False
+UID: ID15, TimeStamp: 03/09/2010 00:00:00, Description: Record 15 modified=False
+UID: ID15, TimeStamp: 03/09/2010 00:00:00, Description: Record 15 modified=False
+UID: ID16, TimeStamp: 03/09/2010 00:00:00, Description: Record 16 modified=False
+UID: ID16, TimeStamp: 03/09/2010 00:00:00, Description: Record 16 modified=False
+UID: ID17, TimeStamp: 03/09/2010 00:00:00, Description: Record 17 modified=False
+UID: ID17, TimeStamp: 03/09/2010 00:00:00, Description: Record 17 modified=False
+OnlyInA
+UID: ID19, TimeStamp: 03/09/2010 00:00:00, Description: Record 19 modified=False
+UID: ID20, TimeStamp: 03/09/2010 00:00:00, Description: Record 20 modified=False
+OnlyInB
+UID: ID02, TimeStamp: 03/09/2010 02:58:55, Description: Record 02 modified=True
+UID: ID09, TimeStamp: 03/09/2010 02:45:18, Description: Record 09 modified=False
+UID: ID22, TimeStamp: 03/09/2010 00:00:00, Description: Record 22 modified=False
+NewerInA
+a:UID: ID01, TimeStamp: 03/09/2010 03:33:28, Description: Record 01 modified=True
+b:UID: ID01, TimeStamp: 03/09/2010 00:51:12, Description: Record 01 modified=False
+a:UID: ID11, TimeStamp: 03/09/2010 03:43:02, Description: Record 11 modified=True
+b:UID: ID11, TimeStamp: 03/09/2010 01:56:32, Description: Record 11 modified=False
+NewerInB
+
+";
+            Assert.AreEqual(
+                expected.NormalizeResult(),
+                actual.NormalizeResult(),
+                "Expecting random changes."
+            );
+
+
+            var builderPrevB = new List<MockDatabaseRecord>();
+            builderPrevB.AddRange(
+                reconciled
+                .Equal
+                .OfType<Tuple<MockDatabaseRecord, MockDatabaseRecord>>()
+                .Select(_ => _.Item1));
+            builderPrevB.AddRange(
+                reconciled
+                .OnlyInB);
+            builderPrevB.AddRange(
+                reconciled
+                .NewerInB);
+            // Don't forget to count NewerInA because it's still in B!!
+            builderPrevB.AddRange(
+                reconciled
+                .NewerInB);
+
+            using (dac.GetToken(ReconciliationMode.TakeA))
+            {
+                reconciled++;
+            }
+
+            actual = reconciled.ToString();
+            actual.ToClipboard();
+            actual.ToClipboardAssert("Expecting removal of 4 records leaving 10 equal.");
+            { }
+
+            expected = @" 
+Equal
+UID: ID01, TimeStamp: 03/09/2010 03:33:28, Description: Record 01 modified=False
+UID: ID01, TimeStamp: 03/09/2010 03:33:28, Description: Record 01 modified=False
+UID: ID03, TimeStamp: 03/09/2010 02:14:23, Description: Record 03 modified=False
+UID: ID03, TimeStamp: 03/09/2010 02:14:23, Description: Record 03 modified=False
+UID: ID05, TimeStamp: 03/09/2010 01:27:42, Description: Record 05 modified=False
+UID: ID05, TimeStamp: 03/09/2010 01:27:42, Description: Record 05 modified=False
+UID: ID07, TimeStamp: 03/09/2010 00:40:45, Description: Record 07 modified=False
+UID: ID07, TimeStamp: 03/09/2010 00:40:45, Description: Record 07 modified=False
+UID: ID11, TimeStamp: 03/09/2010 03:43:02, Description: Record 11 modified=False
+UID: ID11, TimeStamp: 03/09/2010 03:43:02, Description: Record 11 modified=False
+UID: ID15, TimeStamp: 03/09/2010 00:00:00, Description: Record 15 modified=False
+UID: ID15, TimeStamp: 03/09/2010 00:00:00, Description: Record 15 modified=False
+UID: ID16, TimeStamp: 03/09/2010 00:00:00, Description: Record 16 modified=False
+UID: ID16, TimeStamp: 03/09/2010 00:00:00, Description: Record 16 modified=False
+UID: ID17, TimeStamp: 03/09/2010 00:00:00, Description: Record 17 modified=False
+UID: ID17, TimeStamp: 03/09/2010 00:00:00, Description: Record 17 modified=False
+UID: ID19, TimeStamp: 03/09/2010 00:00:00, Description: Record 19 modified=False
+UID: ID19, TimeStamp: 03/09/2010 00:00:00, Description: Record 19 modified=False
+UID: ID20, TimeStamp: 03/09/2010 00:00:00, Description: Record 20 modified=False
+UID: ID20, TimeStamp: 03/09/2010 00:00:00, Description: Record 20 modified=False
+OnlyInA
+
+OnlyInB
+
+NewerInA
+
+NewerInB
+
+";
+            Assert.AreEqual(
+                expected.NormalizeResult(),
+                actual.NormalizeResult(),
+                "Expecting removal of 4 records leaving 10 equal."
+            );
+
+
+            var builderCurrentB = new List<MockDatabaseRecord>();
+            builderCurrentB.AddRange(
+                reconciled
+                .Equal
+                .OfType<Tuple<MockDatabaseRecord, MockDatabaseRecord>>()
+                .Select(_ => _.Item1));
+            builderCurrentB.AddRange(
+                reconciled
+                .OnlyInB);
+            builderCurrentB.AddRange(
+                reconciled
+                .NewerInB);
+            // Don't forget to count NewerInA because it's still in B!!
+            builderPrevB.AddRange(
+                reconciled
+                .NewerInB);
+
+            Assert.AreEqual(
+                builderPrevA.Count(),
+                builderCurrentA.Count(),
+                $"Expecting the before-and-after A count to jibe.");
+
             #region L o c a l M e t h o d s
-            [Obsolete("Neat concept, but somewhat superceded by internalRemoveRandom")]
+
             void localMakeWeightedRandomChanges()
             {
                 var recordsToChange = new List<MockDatabaseRecord>();

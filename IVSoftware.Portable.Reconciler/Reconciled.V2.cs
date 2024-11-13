@@ -72,10 +72,10 @@ namespace IVSoftware.Portable
                         localTrim();
                         break;
                     case ReconciliationMode.TakeA:
-                        Debug.Fail(nameof(NotImplementedException));
+                        localTakeA();
                         break;
                     case ReconciliationMode.TakeB:
-                        Debug.Fail(nameof(NotImplementedException));
+                        localTakeB();
                         break;
                     default:
                         Debug.Fail(nameof(NotImplementedException));
@@ -106,27 +106,101 @@ namespace IVSoftware.Portable
                         b.Remove(record);
                     }
                 }
+                void localTakeA()
+                {
+                    foreach (ICloneable record in OnlyInA)
+                    {
+                        b.Add(record.Clone());
+                    }
+                    foreach (ICloneable record in OnlyInB)
+                    {
+                        b.Remove(record);
+                    }
+                }
+                void localTakeB()
+                {
+                    foreach (ICloneable record in OnlyInA)
+                    {
+                        a.Remove(record);
+                    }
+                    foreach (ICloneable record in OnlyInB)
+                    {
+                        a.Add(record.Clone());
+                    }
+                }
                 void localUpdate()
                 {
-                    foreach (T record in NewerInA)
+                    switch (primaryMode)
                     {
-                        if (Not is Dictionary<T, T> not)
-                        {
-                            if (not[record] is IReconcilable<T> updatable)
+                        case ReconciliationMode.Append:
+                        case ReconciliationMode.Trim:
+                            foreach (T record in NewerInA)
                             {
-                                updatable.UpdateFrom(record);
+                                if (Not is Dictionary<T, T> not)
+                                {
+                                    if (not[record] is IReconcilable<T> updatable)
+                                    {
+                                        updatable.UpdateFrom(record);
+                                    }
+                                }
                             }
-                        }
-                    }
-                    foreach (T record in NewerInB)
-                    {
-                        if (Not is Dictionary<T, T> not)
-                        {
-                            if (not[record] is IReconcilable<T> updatable)
+                            foreach (T record in NewerInB)
                             {
-                                updatable.UpdateFrom(record);
+                                if (Not is Dictionary<T, T> not)
+                                {
+                                    if (not[record] is IReconcilable<T> updatable)
+                                    {
+                                        updatable.UpdateFrom(record);
+                                    }
+                                }
                             }
-                        }
+                            break;
+                        case ReconciliationMode.TakeA:
+                            foreach (T record in NewerInA)
+                            {
+                                if (Not is Dictionary<T, T> not)
+                                {
+                                    if (not[record] is IReconcilable<T> updatable)
+                                    {
+                                        updatable.UpdateFrom(record);
+                                    }
+                                }
+                            }
+                            foreach (T record in NewerInB)
+                            {
+                                if (Not is Dictionary<T, T> not)
+                                {
+                                    if (record is IReconcilable<T> overwrite && not[record] is T takeA)
+                                    {
+                                        overwrite.UpdateFrom(takeA);
+                                    }
+                                }
+                            }
+                            break;
+                        case ReconciliationMode.TakeB:
+                            foreach (T record in NewerInA)
+                            {
+                                if (Not is Dictionary<T, T> not)
+                                {
+                                    if (record is IReconcilable<T> overwrite && not[record] is T takeB)
+                                    {
+                                        overwrite.UpdateFrom(takeB);
+                                    }
+                                }
+                            }
+                            foreach (T record in NewerInB)
+                            {
+                                if (Not is Dictionary<T, T> not)
+                                {
+                                    if (not[record] is IReconcilable<T> updatable)
+                                    {
+                                        updatable.UpdateFrom(record);
+                                    }
+                                }
+                            }
+                            break;
+                        default:
+                            throw new NotImplementedException();
                     }
                 }
                 #endregion L o c a l  M e t h o d s
