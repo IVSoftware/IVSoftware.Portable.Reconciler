@@ -132,7 +132,7 @@ namespace IVSoftware.Portable.Static.Reconciler.MSTest
         static int autoIncrement { get; set; } = 1;
         string? actual, expected, expr;
 
-        DisposableApplyContext DHOST_APPLYCONTEXT = Reconciled<MockDatabaseRecord>.DHostApplyContext;
+        DisposableReconcileContext DHOST_APPLYCONTEXT = Reconciled<MockDatabaseRecord>.DHostApplyContext;
 
         List<MockDatabaseRecord>
             listA,
@@ -146,6 +146,7 @@ namespace IVSoftware.Portable.Static.Reconciler.MSTest
             actual = expected = expr = null;
             listA = Enumerable.Range(1, 12).Select(_ => internalGetNewRecord()).ToList();
             listB = new List<MockDatabaseRecord>();
+            Reconciled.DHostApplyContext.ClearDefaultApplyContext();
         }
 
         [TestCleanup]
@@ -160,54 +161,58 @@ namespace IVSoftware.Portable.Static.Reconciler.MSTest
         [TestMethod]
         public void TestDisposableExecutionHost()
         {
-            var uut = Reconciled<MockDatabaseRecord>.DHostApplyContext;
+            var uut = Reconciled.DHostApplyContext;
             Assert.AreEqual(
-                uut.DefaultMode,
-                ReconciliationMode.Append,
-                $"Expecting that, as tests run, this will stay the default value for the class");
+                uut.DefaultContext.OnReconcile,
+                OnReconcile.Append,
+                $"Expecting this to be cleared in [TestInitialize]");
+            Assert.AreEqual(
+                uut.DefaultContext.OnCollision,
+                OnCollision.Move,
+                $"Expecting this to be cleared in [TestInitialize]");
+
             Assert.IsTrue(uut.IsZero());
             Assert.AreEqual(
-                uut.DefaultMode,
-                uut.Mode,
+                uut.DefaultContext.OnReconcile,
+                uut.OnReconcile,
                 $"Expecting identity while count IsZero()");
-            using (uut.GetToken(ReconciliationMode.Trim))
+            using (uut.GetToken(OnReconcile.Trim))
             {
                 Assert.AreEqual(
-                    ReconciliationMode.Trim,
-                    uut.Mode,
+                    OnReconcile.Trim,
+                    uut.OnReconcile,
                     $"Expecting pushed value.");
-                using (uut.GetToken(ReconciliationMode.TakeA))
+                using (uut.GetToken(OnReconcile.TakeA))
                 {
                     Assert.AreEqual(
-                        ReconciliationMode.TakeA,
-                        uut.Mode,
+                        OnReconcile.TakeA,
+                        uut.OnReconcile,
                         $"Expecting pushed value.");
-                    using (uut.GetToken(ReconciliationMode.TakeB))
+                    using (uut.GetToken(OnReconcile.TakeB))
                     {
                         Assert.AreEqual(
-                            ReconciliationMode.TakeB,
-                            uut.Mode,
+                            OnReconcile.TakeB,
+                            uut.OnReconcile,
                             $"Expecting pushed value.");
                     }
                     Assert.AreEqual(
-                        ReconciliationMode.TakeA,
-                        uut.Mode,
+                        OnReconcile.TakeA,
+                        uut.OnReconcile,
                         $"Expecting popped value.");
                 }
                 Assert.AreEqual(
-                    ReconciliationMode.Trim,
-                    uut.Mode,
+                    OnReconcile.Trim,
+                    uut.OnReconcile,
                     $"Expecting popped value.");
             }
             Assert.AreEqual(
-                uut.DefaultMode,
-                ReconciliationMode.Append,
-                $"Expecting that, as tests run, this will stay the default value for the class");
-            Assert.IsTrue(uut.IsZero());
+                uut.DefaultContext.OnReconcile,
+                OnReconcile.Append,
+                $"Expecting this to be returned to default value");
             Assert.AreEqual(
-                uut.DefaultMode,
-                uut.Mode,
-                $"Expecting identity while count IsZero()");
+                uut.DefaultContext.OnCollision,
+                OnCollision.Move,
+                $"Expecting this to be returned to default value");
 
             Assert.IsNull(uut.SrceA);
             Assert.IsNull(uut.SrceB);
@@ -220,6 +225,8 @@ namespace IVSoftware.Portable.Static.Reconciler.MSTest
             }
             Assert.IsNull(uut.SrceA);
             Assert.IsNull(uut.SrceB);
+
+            uut.SetDefaultApplyContext(new ReconcileContext(listA, listB, OnReconcile.Append, OnCollision.Move));
         }
 
         /// <summary>
@@ -735,7 +742,7 @@ NewerInB
             );
 
             // Using Trim mode to reduce records and validate
-            using (DHOST_APPLYCONTEXT.GetToken(ReconciliationMode.Trim))
+            using (DHOST_APPLYCONTEXT.GetToken(OnReconcile.Trim))
             {
                 reconciled++;
             }
@@ -880,7 +887,7 @@ b:UID: ID05, TimeStamp: 03/09/2010 01:55:16, Description: Record 05 modified=Tru
                 reconciled
                 .NewerInB);
 
-            using (DHOST_APPLYCONTEXT.GetToken(ReconciliationMode.TakeA))
+            using (DHOST_APPLYCONTEXT.GetToken(OnReconcile.TakeA))
             {
                 reconciled++;
             }
@@ -1054,7 +1061,7 @@ NewerInB
                 reconciled
                 .NewerInB);
 
-            using (DHOST_APPLYCONTEXT.GetToken(ReconciliationMode.TakeA))
+            using (DHOST_APPLYCONTEXT.GetToken(OnReconcile.TakeA))
             {
                 reconciled++;
             }
@@ -1135,7 +1142,7 @@ NewerInB
             Reconciled<MockDatabaseRecord>.DefaultExec = () => Reconcile(
                     listA,
                     listB,
-                    diffMode: DiffReportMode.Disabled);
+                    diffMode: OnReport.Disabled);
 
             Reconciled<MockDatabaseRecord> reconciled;
 
@@ -1626,7 +1633,7 @@ NewerInB
             );
 
             // Using Trim mode to reduce records and validate
-            using (DHOST_APPLYCONTEXT.GetToken(ReconciliationMode.Trim))
+            using (DHOST_APPLYCONTEXT.GetToken(OnReconcile.Trim))
             {
                 reconciled++;
             }
@@ -1771,7 +1778,7 @@ b:UID: ID05, TimeStamp: 03/09/2010 01:55:16, Description: Record 05 modified=Tru
                 reconciled
                 .NewerInB);
 
-            using (DHOST_APPLYCONTEXT.GetToken(ReconciliationMode.TakeA))
+            using (DHOST_APPLYCONTEXT.GetToken(OnReconcile.TakeA))
             {
                 reconciled++;
             }
@@ -1946,7 +1953,7 @@ NewerInB
                 reconciled
                 .NewerInB);
 
-            using (DHOST_APPLYCONTEXT.GetToken(ReconciliationMode.TakeA))
+            using (DHOST_APPLYCONTEXT.GetToken(OnReconcile.TakeA))
             {
                 reconciled++;
             }
@@ -2079,7 +2086,7 @@ NewerInB
             Reconciled.DefaultExec = () => Reconcile(
                     listA,
                     listB,
-                    diffMode: DiffReportMode.Report);
+                    diffMode: OnReport.Report);
 
             Reconciled<MockDatabaseRecord> reconciled;
 
@@ -2686,7 +2693,7 @@ NewerInB
             );
 
             // Using Trim mode to reduce records and validate
-            using (DHOST_APPLYCONTEXT.GetToken(ReconciliationMode.Trim))
+            using (DHOST_APPLYCONTEXT.GetToken(OnReconcile.Trim))
             {
                 reconciled++;
             }
@@ -2866,7 +2873,7 @@ b:UID: ID05, TimeStamp: 03/09/2010 01:55:16, Description: Record 05 modified=Tru
                 reconciled
                 .NewerInB);
 
-            using (DHOST_APPLYCONTEXT.GetToken(ReconciliationMode.TakeA))
+            using (DHOST_APPLYCONTEXT.GetToken(OnReconcile.TakeA))
             {
                 reconciled++;
             }
@@ -3066,7 +3073,7 @@ NewerInB
                 reconciled
                 .NewerInB);
 
-            using (DHOST_APPLYCONTEXT.GetToken(ReconciliationMode.TakeA))
+            using (DHOST_APPLYCONTEXT.GetToken(OnReconcile.TakeA))
             {
                 reconciled++;
             }
@@ -3205,7 +3212,7 @@ NewerInB
             Reconciled.DefaultExec = () => Reconcile(
                     listA,
                     listB,
-                    diffMode: DiffHandleMode.Report); // Starting out with Report, not Move, IS INTENTIONAL and ok.
+                    diffMode: OnCollision.Report); // Starting out with Report, not Move, IS INTENTIONAL and ok.
 
             Reconciled<MockDatabaseRecord> reconciled;
 
@@ -3419,7 +3426,7 @@ b:UID: ID09, TimeStamp: 03/09/2010 02:45:18, Description: Record 09 modified=Tru
             // 241114 ADDED:
             // Ways of verifying the switch to MOVE.
             // First of all, don't get confused and start believing tha
-            Assert.AreEqual(ReconciliationMode.Append, Reconciled.DHostApplyContext.DefaultMode);
+            Assert.AreEqual(OnReconcile.Append, Reconciled.DHostApplyContext.OnReconcile);
 
 
 
@@ -3428,7 +3435,7 @@ b:UID: ID09, TimeStamp: 03/09/2010 02:45:18, Description: Record 09 modified=Tru
             Reconciled.DefaultExec = () => Reconcile(
                     listA,
                     listB,
-                    diffMode: DiffHandleMode.Move); 
+                    diffMode: OnCollision.Move); 
             reconciled = DefaultExec();
 
             actual = reconciled.ToString();

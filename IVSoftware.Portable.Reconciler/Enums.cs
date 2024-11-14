@@ -4,7 +4,45 @@ using System.Text;
 
 namespace IVSoftware.Portable
 {
-    public enum ReconciliationMode
+    public enum CompareUIDResult
+    {
+        /// <summary>
+        /// A occurs sooner in list than B
+        /// </summary>
+        OnlyInA = -1,
+        /// <summary>
+        /// The UID is the same.
+        /// </summary>
+        InBoth = 0,
+        /// <summary>
+        /// B occurs sooner in list than A
+        /// </summary>
+        OnlyInB = 1,
+    }
+
+    /// <summary>
+    /// POLARITY REVERSED: Whether the property is DateTime or a 
+    /// version like 1.0.00, the greater-than result is the newest. 
+    /// </summary>
+    public enum CompareVersionResult
+    {
+        /// <summary>
+        /// A is Higher, therefore newer
+        /// </summary>
+        NewerIsX = 1,
+
+        /// <summary>
+        /// The versions are identical
+        /// </summary>
+        Equal = 0,
+
+        /// <summary>
+        /// B is higher, therefore newer.
+        /// </summary>
+        NewerIsY = -1,
+    }
+
+    public enum OnReconcile
     {
         /// <summary>
         /// Ensure that both collections contain all items by appending missing items as necessary.
@@ -36,7 +74,7 @@ namespace IVSoftware.Portable
     /// one of the items is newer; it's just that reporting it as such may not tell the whole story.
     /// </summary>
 
-    public enum DiffReportMode
+    public enum OnReport
     {
         /// <summary>
         /// - Version 2 collision handling capability is disabled.
@@ -73,7 +111,7 @@ namespace IVSoftware.Portable
     /// one of the items is newer; it's just that reporting it as such may not tell the whole story.
     /// </summary>
 
-    public enum DiffHandleMode
+    public enum OnCollision
     {
         /// <summary>
         /// - Version 2 collision handling capability is disabled.

@@ -49,14 +49,14 @@ namespace IVSoftware.Portable
         /// <summary>
         /// Applies the reconciliation changes to update the collections based on the categorized differences.
         /// </summary>
-        void Apply();
+        void Apply(ReconcileContext applyContext = null);
 
         /// <summary>
         /// Applies reconciliation with an optional loopback function for iterative or custom execution.
         /// </summary>
         /// <param name="customExec">Optional function to customize the reconciliation process.</param>
         /// <returns>An updated IReconciled instance reflecting applied changes.</returns>
-        IReconciled ApplyWithLoopback(Func<IReconciled> customExec = null);
+        IReconciled ApplyWithLoopback(Func<IReconciled> customExec = null, ReconcileContext applyContext = null);
     }
 
     public interface IReconcilable : ICloneable

@@ -22,7 +22,7 @@ namespace IVSoftware.Portable
             IEnumerable<T> srceB,
             Func<T, T, CompareUIDResult> uidSorter,
             Func<T, T, CompareVersionResult> versionComparer,
-            DiffReportMode diffMode,
+            OnReport diffMode,
             Func<T, T, int> resultSorter = null
         )
         {
@@ -43,7 +43,7 @@ namespace IVSoftware.Portable
         public static Reconciled<T> Reconcile<T>(
             IEnumerable<T> srceA,
             IEnumerable<T> srceB,
-            DiffReportMode diffMode
+            OnReport diffMode
         ) where T : IReconcilable
         {
             var reconciled = Reconcile(
@@ -68,7 +68,7 @@ namespace IVSoftware.Portable
         public static Reconciled<T> Reconcile<T>(
             IEnumerable<T> srceA,
             IEnumerable<T> srceB,
-            DiffHandleMode diffMode
+            OnCollision diffMode
         ) where T : IReconcilable
         {
             var reconciled = Reconcile(

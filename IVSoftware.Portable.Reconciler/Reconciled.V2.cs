@@ -18,13 +18,13 @@ namespace IVSoftware.Portable
 
         public class Reconciled
         {
-            internal static DisposableApplyContext DHostExecContext { get; } = new DisposableApplyContext();
+            internal static DisposableReconcileContext DHostExecContext { get; } = new DisposableReconcileContext();
 
             /// <summary>
             /// Gets a context object for managing reconciliation operations between hosts.
-            /// Each instantiation of <see cref="Reconciled{T}"/> creates a unique <see cref="DisposableApplyContext"/>.
+            /// Each instantiation of <see cref="Reconciled{T}"/> creates a unique <see cref="DisposableReconcileContext"/>.
             /// </summary>
-            public static DisposableApplyContext DHostApplyContext { get; } = new DisposableApplyContext();
+            public static DisposableReconcileContext DHostApplyContext { get; } = new DisposableReconcileContext();
 
             // These are set from static Reconciled method.
             internal IEnumerable _srceA
@@ -108,7 +108,7 @@ namespace IVSoftware.Portable
             /// - Tuple collections like Equal, NewerInA and NewerAndB continue
             ///   to tolerate pairs where both versions have been modified.
             /// </summary>
-            public Enum DefaultDiffMode { get; set; } = DiffHandleMode.Disabled;
+            public Enum DefaultDiffMode { get; set; } = OnCollision.Disabled;
         }
 
         /// <summary>
@@ -128,10 +128,10 @@ namespace IVSoftware.Portable
                     {
                         _diffMode = value;
                         // If it's a DiffReportMode, cast it.
-                        switch ((DiffHandleMode)_diffMode)
+                        switch ((OnCollision)_diffMode)
                         {
-                            case DiffHandleMode.Report:
-                            case DiffHandleMode.Move:
+                            case OnCollision.Report:
+                            case OnCollision.Move:
                                 var cMe = this.ToString();
                                 { }
                                 var diffs = new List<DiffDescriptor>();
@@ -147,7 +147,7 @@ namespace IVSoftware.Portable
                                     if (localIsModifiedInBoth(tuple.Item1, tuple.Item2, out IReconcilableDiffs tA, out IReconcilableDiffs tB))
                                     {
                                         diffs.Add(new DiffDescriptor(tA, tB));
-                                        if (Equals(_diffMode, DiffHandleMode.Move))
+                                        if (Equals(_diffMode, OnCollision.Move))
                                         {
                                             equals.Remove(tuple);
                                             equalChanged = true;
@@ -163,7 +163,7 @@ namespace IVSoftware.Portable
                                         tB.IsModified)
                                     {
                                         diffs.Add(new DiffDescriptor(tA, tB));
-                                        if (Equals(_diffMode, DiffHandleMode.Move))
+                                        if (Equals(_diffMode, OnCollision.Move))
                                         {
                                             newerInA.Remove(t);
                                             newerInAChanged = true;
@@ -179,7 +179,7 @@ namespace IVSoftware.Portable
                                         tB.IsModified)
                                     {
                                         diffs.Add(new DiffDescriptor(tA, tB));
-                                        if (Equals(_diffMode, DiffHandleMode.Move))
+                                        if (Equals(_diffMode, OnCollision.Move))
                                         {
                                             newerInB.Remove(t);
                                             newerInBChanged = true;
@@ -187,7 +187,7 @@ namespace IVSoftware.Portable
                                     }
                                 }
                                 // Final update.
-                                if (Equals(_diffMode, DiffHandleMode.Move))
+                                if (Equals(_diffMode, OnCollision.Move))
                                 {
                                     if (equalChanged)
                                     {
@@ -241,13 +241,24 @@ namespace IVSoftware.Portable
             IEnumerable IReconciled.NewerInA => NewerInA;
             IEnumerable IReconciled.NewerInB => NewerInB;
             IEnumerable IReconciled.Not => Not;
-            #endregion I N T E R F A C E
 
             /// <summary>
             /// Applies the reconciliation changes between two data sets using the current apply context settings.
             /// </summary>
-            public void Apply()
+            public void Apply(ReconcileContext applyContext = null)
             {
+                if(applyContext is null)
+                {
+
+                }
+                else
+                {
+                    using(DHostApplyContext.GetToken(applyContext))
+                    {
+
+                    }
+                }
+
                 var srceA = DHostApplyContext.SrceA ?? _srceA;
                 var srceB = DHostApplyContext.SrceB ?? _srceB;
                 if (srceA is null || srceB is null)
@@ -256,7 +267,7 @@ namespace IVSoftware.Portable
                 }
                 else
                 {
-                    ApplyReconciled(srceA, srceB, DHostApplyContext.Mode);
+                    ApplyReconciled(srceA, srceB, DHostApplyContext.OnReconcile);
                 }
             }
 
@@ -265,7 +276,7 @@ namespace IVSoftware.Portable
             /// </summary>
             /// <param name="customExec">A function to execute custom reconciliation behavior. If null, <see cref="DefaultExec"/> is used.</param>
             /// <returns>An <see cref="IReconciled"/> object representing the applied state.</returns>
-            public IReconciled ApplyWithLoopback(Func<IReconciled> customExec = null)
+            public IReconciled ApplyWithLoopback(Func<IReconciled> customExec = null, ReconcileContext applyContext = null)
             {
                 var srceA = DHostApplyContext.SrceA ?? _srceA;
                 var srceB = DHostApplyContext.SrceB ?? _srceB;
@@ -275,10 +286,11 @@ namespace IVSoftware.Portable
                 }
                 else
                 {
-                    ApplyReconciled(srceA, srceB, DHostApplyContext.Mode);
+                    ApplyReconciled(srceA, srceB, DHostApplyContext.OnReconcile);
                 }
                 return customExec?.Invoke() ?? DefaultExec?.Invoke();
             }
+            #endregion I N T E R F A C E
 
             /// <summary>
             /// Applies reconciliation changes based on the specified mode, updating lists <paramref name="a"/> and <paramref name="b"/>.
@@ -286,22 +298,22 @@ namespace IVSoftware.Portable
             /// <param name="a">The first list of records to be reconciled.</param>
             /// <param name="b">The second list of records to be reconciled.</param>
             /// <param name="primaryMode">The mode in which reconciliation is performed (e.g., Append, Trim, etc.).</param>
-            public void ApplyReconciled(IEnumerable unkA, IEnumerable unkB, ReconciliationMode primaryMode)
+            public void ApplyReconciled(IEnumerable unkA, IEnumerable unkB, OnReconcile primaryMode)
             {
                 if (unkA is IList a && unkB is IList b)
                 {
                     switch (primaryMode)
                     {
-                        case ReconciliationMode.Append:
+                        case OnReconcile.Append:
                             localAppend();
                             break;
-                        case ReconciliationMode.Trim:
+                        case OnReconcile.Trim:
                             localTrim();
                             break;
-                        case ReconciliationMode.TakeA:
+                        case OnReconcile.TakeA:
                             localTakeA();
                             break;
-                        case ReconciliationMode.TakeB:
+                        case OnReconcile.TakeB:
                             localTakeB();
                             break;
                         default:
@@ -362,8 +374,8 @@ namespace IVSoftware.Portable
                 {
                     switch (primaryMode)
                     {
-                        case ReconciliationMode.Append:
-                        case ReconciliationMode.Trim:
+                        case OnReconcile.Append:
+                        case OnReconcile.Trim:
                             foreach (T record in NewerInA)
                             {
                                 if (Not is Dictionary<T, T> not)
@@ -385,7 +397,7 @@ namespace IVSoftware.Portable
                                 }
                             }
                             break;
-                        case ReconciliationMode.TakeA:
+                        case OnReconcile.TakeA:
                             foreach (T record in NewerInA)
                             {
                                 if (Not is Dictionary<T, T> not)
@@ -407,7 +419,7 @@ namespace IVSoftware.Portable
                                 }
                             }
                             break;
-                        case ReconciliationMode.TakeB:
+                        case OnReconcile.TakeB:
                             foreach (T record in NewerInA)
                             {
                                 if (Not is Dictionary<T, T> not)

@@ -7,44 +7,7 @@ namespace IVSoftware.Portable
 {
     public partial class Reconciler
     {
-        public enum CompareUIDResult
-        {
-            /// <summary>
-            /// A occurs sooner in list than B
-            /// </summary>
-            OnlyInA = -1,
-            /// <summary>
-            /// The UID is the same.
-            /// </summary>
-            InBoth = 0,
-            /// <summary>
-            /// B occurs sooner in list than A
-            /// </summary>
-            OnlyInB = 1,
-        }
-
-        /// <summary>
-        /// POLARITY REVERSED: Whether the property is DateTime or a 
-        /// version like 1.0.00, the greater-than result is the newest. 
-        /// </summary>
-        public enum CompareVersionResult
-        {
-            /// <summary>
-            /// A is Higher, therefore newer
-            /// </summary>
-            NewerIsX = 1,
-
-            /// <summary>
-            /// The versions are identical
-            /// </summary>
-            Equal = 0,
-
-            /// <summary>
-            /// B is higher, therefore newer.
-            /// </summary>
-            NewerIsY = -1,
-        }
-
+        #region S T A B L E
 
         /// <summary>
         /// Static method to categorize two collections of items.
@@ -220,12 +183,12 @@ namespace IVSoftware.Portable
                 switch (DiffMode)
                 {
                     default:
-                    case DiffReportMode.Disabled:
-                    case DiffHandleMode.Disabled:
+                    case OnReport.Disabled:
+                    case OnCollision.Disabled:
                         break;
-                    case DiffReportMode.Report:
-                    case DiffHandleMode.Report:
-                    case DiffHandleMode.Move:
+                    case OnReport.Report:
+                    case OnCollision.Report:
+                    case OnCollision.Move:
                         return ToStringV2();
                 }
 
@@ -270,5 +233,6 @@ namespace IVSoftware.Portable
                 }
             }
         }
+        #endregion S T A B L E
     }
 }
