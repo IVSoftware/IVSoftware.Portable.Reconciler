@@ -13,7 +13,7 @@ namespace IVSoftware.Portable
         IEnumerable NewerInA { get; }
         IEnumerable NewerInB { get; }
         IEnumerable Not { get; }
-        IEnumerable Diffs { get; }
+        IEnumerable Collisions { get; }
         void Apply();
         IReconciled ApplyWithLoopback(Func<IReconciled> customExec = null);
     }
@@ -57,7 +57,9 @@ namespace IVSoftware.Portable
     {
         T UpdateFrom(T value);
     }
+    public interface IReconcilableDiffs
+    {
+        bool IsModified { get; }
+    }
     #endregion S T A B L E
 }
-
-

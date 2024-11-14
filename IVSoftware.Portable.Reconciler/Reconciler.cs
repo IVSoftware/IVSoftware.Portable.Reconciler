@@ -137,7 +137,8 @@ namespace IVSoftware.Portable
                 equal: equal,
                 resultSorter: resultSorter,
                 not: not
-            );
+            )
+            { _srceA = srceA, _srceB = srceB };
         }
 
         /// <summary>
@@ -179,7 +180,7 @@ namespace IVSoftware.Portable
             /// <summary>
             /// Items contained in both lists, where A has the newer time stamp.
             /// </summary>
-            public T[] NewerInA { get; }
+            public T[] NewerInA { get; private set; }
 
             /// <summary>
             /// Items that are only contained in the B list.
@@ -189,12 +190,12 @@ namespace IVSoftware.Portable
             /// <summary>
             /// Items contained in both lists, where B has the newer time stamp.
             /// </summary>
-            public T[] NewerInB { get; }
+            public T[] NewerInB { get; private set; }
 
             /// <summary>
             /// Items contained in both lists, whose sort criteria and time stamps are identical.
             /// </summary>
-            public Tuple<T, T>[] Equal { get; }
+            public Tuple<T, T>[] Equal { get; private set; }
 
             /// <summary>
             /// Detects whether the two lists are 'not' in sync.
@@ -216,6 +217,18 @@ namespace IVSoftware.Portable
             /// </summary>
             public override string ToString()
             {
+                switch (DiffMode)
+                {
+                    default:
+                    case DiffReportMode.Disabled:
+                    case DiffHandleMode.Disabled:
+                        break;
+                    case DiffReportMode.Report:
+                    case DiffHandleMode.Report:
+                    case DiffHandleMode.Move:
+                        return ToStringV2();
+                }
+
                 var equal =
                     nameof(Equal) + Environment.NewLine +
                     string.Join(

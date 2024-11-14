@@ -2,17 +2,15 @@
 using IVSoftware.WinOS.MSTest.Extensions;
 using Newtonsoft.Json;
 using SQLite;
-using System.Collections;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using static IVSoftware.Portable.Reconciler;
 using IgnoreAttribute = SQLite.IgnoreAttribute;
 
 namespace IVSoftware.Portable.Static.Reconciler.MSTest
 {
     #region S T A B L E
-    public class MockDatabaseRecord : IReconcilable<MockDatabaseRecord>, INotifyPropertyChanged
+    public class MockDatabaseRecord : IReconcilable<MockDatabaseRecord>, IReconcilableDiffs, INotifyPropertyChanged
     {
         #region I N T E R F A C E
         IComparable IReconcilable.UIDCompareProperty => Uid;
@@ -119,15 +117,6 @@ namespace IVSoftware.Portable.Static.Reconciler.MSTest
 
         public object Clone() => this.Clone<MockDatabaseRecord>();
 
-    }
-
-    public class MockReconcilableDatabaseRecord : MockDatabaseRecord, IReconcilable
-    {
-        public IComparable UIDCompareProperty => Uid;
-
-        public IComparable VersionCompareProperty => TimeStamp;
-
-        public IComparable? ResultSorterProperty => null;
     }
     #endregion S T A B L E
 }
